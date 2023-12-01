@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "2023-advent-of-code/day1"
 
 func main() {
-	fmt.Println("Hello, World!")
+	day1.RunDay1Part1()
 }
