@@ -1,9 +1,13 @@
 package main
 
 import (
-	day4 "2023-advent-of-code/day4"
+	"2023-advent-of-code/day5"
+	"fmt"
+	"time"
 )
 
 func main() {
-	day4.RunDay4Part2()
+	start := time.Now()
+	day5.RunDay5Part2()
+	fmt.Println("Done in: ", time.Now().Sub(start))
 }
