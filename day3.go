@@ -1,4 +1,4 @@
-package day3
+package main
 
 import (
 	"2023-advent-of-code/helpers"
