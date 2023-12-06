@@ -6,7 +6,42 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
+
+func RunDay6Part2() {
+	file, err := os.Open("./inputs/day6input.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	times := helpers.ParseInts(scanner.Text())
+	timeString := ""
+	for _, v := range times {
+		timeString += strconv.Itoa(v)
+	}
+	fmt.Println(timeString)
+	scanner.Scan()
+	distances := helpers.ParseInts(scanner.Text())
+	distanceString := ""
+	for _, v := range distances {
+		distanceString += strconv.Itoa(v)
+	}
+	fmt.Println(distanceString)
+
+	bigTime, _ := strconv.Atoi(timeString)
+	bigDistance, _ := strconv.Atoi(distanceString)
+	middleTime := bigTime / 2
+	firstWinningTime := FindFirstWinningTime(middleTime, 0, bigTime, bigDistance)
+	waysToWin := (middleTime - firstWinningTime + 1) * 2
+	if bigTime%2 == 0 {
+		waysToWin--
+	}
+
+	fmt.Println(waysToWin)
+}
 
 func RunDay6Part1() {
 	file, err := os.Open("./inputs/day6input.txt")
