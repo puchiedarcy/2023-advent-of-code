@@ -98,8 +98,14 @@ func RunDay7Part1() {
 
 		bid := helpers.ParseInts(lineText[6:])[0]
 		cards := make(map[int]int)
+		jokersToHandle := 0
 		for i := 0; i < 5; i++ {
-			cards[ConvertSymbolToValue(lineText[i])]++
+			value := ConvertSymbolToValue(lineText[i])
+			if value > 1 {
+				cards[value]++
+			} else {
+				jokersToHandle++
+			}
 		}
 
 		sortedRanks := make([]int, 0, len(cards))
@@ -109,6 +115,19 @@ func RunDay7Part1() {
 		sort.SliceStable(sortedRanks, func(i, j int) bool {
 			return cards[sortedRanks[i]] > cards[sortedRanks[j]]
 		})
+
+		if jokersToHandle == 5 {
+			cards[14] = 5
+			sortedRanks = make([]int, 0, len(cards))
+			for card := range cards {
+				sortedRanks = append(sortedRanks, card)
+			}
+			sort.SliceStable(sortedRanks, func(i, j int) bool {
+				return cards[sortedRanks[i]] > cards[sortedRanks[j]]
+			})
+		} else {
+			cards[sortedRanks[0]] += jokersToHandle
+		}
 
 		hands = append(hands, Hand{
 			cards:       cards,
@@ -135,7 +154,7 @@ func ConvertSymbolToValue(symbol byte) int {
 	case 81: // Q
 		return 12
 	case 74: // J
-		return 11
+		return 1
 	case 84: // T
 		return 10
 	default:
