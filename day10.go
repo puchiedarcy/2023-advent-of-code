@@ -24,6 +24,7 @@ func RunDay10() {
 	defer file.Close()
 
 	pipeMap := []string{}
+	loopOnlyMap := []string{}
 	startRow := 0
 	startCol := -1
 
@@ -31,6 +32,7 @@ func RunDay10() {
 	for scanner.Scan() {
 		lineText := scanner.Text()
 		pipeMap = append(pipeMap, lineText)
+		loopOnlyMap = append(loopOnlyMap, "")
 		start := strings.IndexByte(lineText, 'S')
 		if start != -1 {
 			startCol = start
@@ -40,24 +42,77 @@ func RunDay10() {
 		}
 	}
 
+	for i := 0; i < len(loopOnlyMap); i++ {
+		loopOnlyMap[i] = strings.Repeat(".", len(pipeMap[i]))
+	}
+
 	dir1, dir2 := findStartDirections(&pipeMap, startRow, startCol)
 
-	distance := TakeNextStepInBothDirections(
-		&pipeMap, 0,
+	_ = TakeNextStepInBothDirections(
+		&pipeMap, &loopOnlyMap, 0,
 		startRow, startCol, dir1,
 		startRow, startCol, dir2)
-	fmt.Println(distance)
+
+	totalSpacesInsideLoop := 0
+	insideLoopState := []bool{}
+	for i := 0; i < len(loopOnlyMap[0]); i++ {
+		insideLoopState = append(insideLoopState, false)
+	}
+
+	for r := 0; r < len(loopOnlyMap); r++ {
+		for c := 0; c < len(loopOnlyMap[r]); c++ {
+			switch loopOnlyMap[r][c] {
+			case '.':
+				if insideLoopState[c] {
+					totalSpacesInsideLoop++
+					markedRow := loopOnlyMap[r][:c] + "O"
+					if c+1 < len(loopOnlyMap[r]) {
+						markedRow = markedRow + loopOnlyMap[r][c+1:]
+					}
+					loopOnlyMap[r] = markedRow
+				}
+			case '-', 'F', 'L':
+				insideLoopState[c] = !insideLoopState[c]
+			}
+		}
+	}
+
+	fmt.Println(totalSpacesInsideLoop)
 }
 
 func TakeNextStepInBothDirections(
-	theMap *[]string, steps int,
+	theMap *[]string, loopOnlyMap *[]string, steps int,
 	pos1Row int, pos1Col int, dir1 int,
 	pos2Row int, pos2Col int, dir2 int) int {
 
 	if pos1Row == pos2Row &&
 		pos1Col == pos2Col &&
 		steps > 0 {
+		(*loopOnlyMap)[pos1Row] =
+			(*loopOnlyMap)[pos1Row][:pos1Col] + "-" + (*loopOnlyMap)[pos1Row][pos1Col+1:]
 		return steps
+	}
+
+	firstHalf :=
+		(*loopOnlyMap)[pos1Row][:pos1Col] +
+			string((*theMap)[pos1Row][pos1Col])
+
+	if pos1Col+1 < len((*loopOnlyMap)[pos1Row]) {
+		(*loopOnlyMap)[pos1Row] = firstHalf +
+			(*loopOnlyMap)[pos1Row][pos1Col+1:]
+	} else {
+		(*loopOnlyMap)[pos1Row] = firstHalf
+	}
+
+	firstHalf =
+		(*loopOnlyMap)[pos2Row][:pos2Col] +
+			string((*theMap)[pos2Row][pos2Col])
+
+	if pos2Col+1 < len((*loopOnlyMap)[pos1Row]) {
+		(*loopOnlyMap)[pos2Row] = firstHalf +
+			(*loopOnlyMap)[pos2Row][pos2Col+1:]
+	} else {
+		(*loopOnlyMap)[pos2Row] = firstHalf
 	}
 
 	next1Row, next1Col := calculateNextPos(pos1Row, pos1Col, dir1)
@@ -67,7 +122,7 @@ func TakeNextStepInBothDirections(
 	next2Dir := calculateNextDir((*theMap)[next2Row][next2Col], dir2)
 
 	return TakeNextStepInBothDirections(
-		theMap, steps+1,
+		theMap, loopOnlyMap, steps+1,
 		next1Row, next1Col, next1Dir,
 		next2Row, next2Col, next2Dir)
 }
