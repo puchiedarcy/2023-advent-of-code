@@ -69,7 +69,7 @@ func RunDay11() {
 			for r := 0; r < len(emptyRowsForExpansion); r++ {
 				emptyRow := emptyRowsForExpansion[r]
 				if leftX < emptyRow && emptyRow < rightX {
-					emptyRowsCrossed++
+					emptyRowsCrossed += 999999
 				}
 			}
 
@@ -80,7 +80,7 @@ func RunDay11() {
 			for c := 0; c < len(emptyColsForExpansion); c++ {
 				emptyCol := emptyColsForExpansion[c]
 				if upperY < emptyCol && emptyCol < lowerY {
-					emptyColsCrossed++
+					emptyColsCrossed += 999999
 				}
 			}
 
