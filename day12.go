@@ -10,7 +10,7 @@ import (
 )
 
 func RunDay12() {
-	file, err := os.Open("./inputs/day12inputsmall.txt")
+	file, err := os.Open("./inputs/day12input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,43 +24,43 @@ func RunDay12() {
 		springMap := halves[0]
 		damagedLengths := helpers.ParseInts(halves[1])
 
-		fmt.Println(springMap, damagedLengths)
-
-		findMatches(springMap, damagedLengths, "")
-
+		matches := findMatches(springMap, damagedLengths, "")
+		totalArrangements += matches
 	}
 	fmt.Println(totalArrangements)
 }
 
-func findMatches(springMap string, damagedLengths []int, mapInProgress string) {
+func findMatches(springMap string, damagedLengths []int, mapInProgress string) int {
+	matches := 0
 	for i := 0; i < len(springMap); i++ {
 		if springMap[i] == '.' {
 			mapInProgress += "."
 			continue
 		}
 
-		applyDamageSet(springMap[i:], damagedLengths, mapInProgress)
+		matches += applyDamageSet(springMap[i:], damagedLengths, mapInProgress)
 		if springMap[i] == '?' {
 			mapInProgress += "."
 		}
 	}
 	if len(damagedLengths) == 0 && len(springMap) == 0 {
-		fmt.Println("MATCH:", mapInProgress)
+		return 1
 	}
+	return matches
 }
 
-func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string) {
+func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string) int {
 	if len(damagedLengths) == 0 {
-		return
+		return 0
 	}
 
 	for i := 0; i < damagedLengths[0]; i++ {
 		if i >= len(springMap) {
-			return
+			return 0
 		}
 		currentChar := springMap[i]
 		if currentChar == '.' {
-			return
+			return 0
 		} else {
 			mapInProgress += "#"
 		}
@@ -72,10 +72,10 @@ func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string
 	if len(nextDamagedLengths) != 0 {
 		mapInProgress += "."
 		if len(nextSpringMap) == 0 {
-			return
+			return 0
 		}
 		if nextSpringMap[0] == '#' {
-			return
+			return 0
 		}
 		nextSpringMap = nextSpringMap[1:]
 	}
@@ -85,5 +85,5 @@ func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string
 		mapInProgress += "."
 	}
 
-	findMatches(nextSpringMap, nextDamagedLengths, mapInProgress)
+	return findMatches(nextSpringMap, nextDamagedLengths, mapInProgress)
 }
