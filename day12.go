@@ -18,19 +18,23 @@ func RunDay12() {
 
 	totalArrangements := 0
 	scanner := bufio.NewScanner(file)
+	lineNumber := 1
 	for scanner.Scan() {
 		lineText := scanner.Text()
 		halves := strings.Split(lineText, " ")
 		springMap := halves[0]
 		damagedLengths := helpers.ParseInts(halves[1])
 
-		matches := findMatches(springMap, damagedLengths, "")
+		matches := findMatches(springMap, damagedLengths, "", len(springMap))
+
+		lineNumber++
 		totalArrangements += matches
+
 	}
 	fmt.Println(totalArrangements)
 }
 
-func findMatches(springMap string, damagedLengths []int, mapInProgress string) int {
+func findMatches(springMap string, damagedLengths []int, mapInProgress string, mapLen int) int {
 	matches := 0
 	for i := 0; i < len(springMap); i++ {
 		if springMap[i] == '.' {
@@ -38,18 +42,20 @@ func findMatches(springMap string, damagedLengths []int, mapInProgress string) i
 			continue
 		}
 
-		matches += applyDamageSet(springMap[i:], damagedLengths, mapInProgress)
+		matches += applyDamageSet(springMap[i:], damagedLengths, mapInProgress, mapLen)
 		if springMap[i] == '?' {
 			mapInProgress += "."
 		}
 	}
-	if len(damagedLengths) == 0 && len(springMap) == 0 {
-		return 1
+	if len(damagedLengths) == 0 {
+		if len(mapInProgress) == mapLen {
+			return 1
+		}
 	}
 	return matches
 }
 
-func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string) int {
+func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string, mapLen int) int {
 	if len(damagedLengths) == 0 {
 		return 0
 	}
@@ -85,5 +91,5 @@ func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string
 		mapInProgress += "."
 	}
 
-	return findMatches(nextSpringMap, nextDamagedLengths, mapInProgress)
+	return findMatches(nextSpringMap, nextDamagedLengths, mapInProgress, mapLen)
 }
