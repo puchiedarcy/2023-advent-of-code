@@ -1,6 +1,8 @@
 package helpers
 
-import "sort"
+import (
+	"sort"
+)
 
 func gcd(a int, b int) int {
 	if a == 0 {
@@ -33,4 +35,15 @@ func FindLCM(numbers []int) int {
 		result = lcm(numbers[i], result, gcd)
 	}
 	return result
+}
+
+func Choose(n int, k int) int {
+	return Factorial(n) / (Factorial(n-k) * Factorial(k))
+}
+
+func Factorial(x int) int {
+	if x == 0 {
+		return 1
+	}
+	return x * Factorial(x-1)
 }
