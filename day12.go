@@ -35,12 +35,14 @@ func RunDay12() {
 func findMatches(springMap string, damagedLengths []int, mapInProgress string) {
 	for i := 0; i < len(springMap); i++ {
 		if springMap[i] == '.' {
-			continue
-		} else {
 			mapInProgress += "."
+			continue
 		}
 
 		applyDamageSet(springMap[i:], damagedLengths, mapInProgress)
+		if springMap[i] == '?' {
+			mapInProgress += "."
+		}
 	}
 	if len(damagedLengths) == 0 && len(springMap) == 0 {
 		fmt.Println("MATCH:", mapInProgress)
@@ -48,6 +50,10 @@ func findMatches(springMap string, damagedLengths []int, mapInProgress string) {
 }
 
 func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string) {
+	if len(damagedLengths) == 0 {
+		return
+	}
+
 	for i := 0; i < damagedLengths[0]; i++ {
 		if i >= len(springMap) {
 			return
@@ -66,6 +72,9 @@ func applyDamageSet(springMap string, damagedLengths []int, mapInProgress string
 	if len(nextDamagedLengths) != 0 {
 		mapInProgress += "."
 		if len(nextSpringMap) == 0 {
+			return
+		}
+		if nextSpringMap[0] == '#' {
 			return
 		}
 		nextSpringMap = nextSpringMap[1:]
