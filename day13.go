@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
-func RunDay13() {
+func RunDay13Part2() {
 	file, err := os.Open("./inputs/day13input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -23,70 +24,80 @@ func RunDay13() {
 	for scanner.Scan() {
 		lineText := scanner.Text()
 		if lineText == "" {
-			mirrorIndex, found := findSymmetry(rowMap)
-			if !found {
-				mirrorIndex, found = findSymmetry(colMap)
-				colTotal += mirrorIndex + 1
-			} else {
-				rowTotal += mirrorIndex + 1
-			}
+			r, c := doThePuzzle(rowMap, colMap)
+			rowTotal += r
+			colTotal += c
 
-			fmt.Println("found", mirrorIndex+1)
-			row = 0
-			rowMap = make(map[int]string)
 			colMap = make(map[int]string)
+			rowMap = make(map[int]string)
+			row = 0
 			continue
-		}
-
-		rowMap[row] = lineText
-		row++
-		for k, v := range lineText {
-			colMap[k] += string(v)
+		} else {
+			inBits := strings.Replace(lineText, "#", "1", -1)
+			inBits = strings.Replace(inBits, ".", "0", -1)
+			rowMap[row] = inBits
+			row++
+			for k, v := range lineText {
+				colMap[k] += string(v)
+			}
 		}
 	}
 
-	fmt.Println(rowMap)
-	fmt.Println(colMap)
-	fmt.Println("search LAST rows")
-	mirrorIndex, found := findSymmetry(rowMap)
-	if !found {
-		fmt.Println("search cols")
-		mirrorIndex, found = findSymmetry(colMap)
-		colTotal += mirrorIndex + 1
-	} else {
-		rowTotal += mirrorIndex + 1
-	}
-	fmt.Println("found", mirrorIndex+1)
+	r, c := doThePuzzle(rowMap, colMap)
+	rowTotal += r
+	colTotal += c
 
-	theTotal := rowTotal*100 + colTotal
-	fmt.Println(theTotal)
+	fmt.Println(rowTotal*100 + colTotal)
 }
 
-func findSymmetry(theMap map[int]string) (int, bool) {
-	mirrorIndex := 0
-	for mirrorIndex < len(theMap)-1 {
-		if theMap[mirrorIndex] == theMap[mirrorIndex+1] {
+func doThePuzzle(rowMap map[int]string, colMap map[int]string) (int, int) {
+	mirror, found := findExistingSymmetry(rowMap)
+	if found {
+		return mirror, 0
+	}
 
-			leftIndex := mirrorIndex - 1
-			rightIndex := mirrorIndex + 2
+	mirror, found = findExistingSymmetry(colMap)
+	return 0, mirror
+}
 
-			isCompleteMirror := true
-			for leftIndex >= 0 && rightIndex < len(theMap) {
-				if theMap[leftIndex] == theMap[rightIndex] {
-					leftIndex--
-					rightIndex++
-					continue
+func findExistingSymmetry(bitMap map[int]string) (int, bool) {
+	for i := 0; i < len(bitMap)-1; i++ {
+		distance := hamming([]byte(bitMap[i]), []byte(bitMap[i+1]))
+		if distance == 0 {
+			left := i
+			right := i + 1
+			isMirror := true
+			for left >= 0 && right < len(bitMap) {
+				if 0 == hamming([]byte(bitMap[left]), []byte(bitMap[right])) {
+					left--
+					right++
 				} else {
-					isCompleteMirror = false
+					isMirror = false
 					break
 				}
 			}
 
-			if isCompleteMirror {
-				return mirrorIndex, true
+			if isMirror {
+				return i + 1, true
 			}
+		} else {
+			continue
 		}
-		mirrorIndex++
 	}
 	return 0, false
+}
+
+func hamming(a, b []byte) int {
+	diff := 0
+	for i := 0; i < len(a); i++ {
+		b1 := a[i]
+		b2 := b[i]
+		for j := 0; j < 8; j++ {
+			mask := byte(1 << uint(j))
+			if (b1 & mask) != (b2 & mask) {
+				diff++
+			}
+		}
+	}
+	return diff
 }
