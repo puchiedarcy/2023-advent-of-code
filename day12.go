@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func RunDay12() {
@@ -22,10 +23,18 @@ func RunDay12() {
 	for scanner.Scan() {
 		lineText := scanner.Text()
 		halves := strings.Split(lineText, " ")
-		springMap := halves[0]
-		damagedLengths := helpers.ParseInts(halves[1])
-
+		springMap := strings.Repeat(halves[0]+"?", 5)
+		springMap = springMap[:len(springMap)-1]
+		damagedLengths := []int{}
+		for i := 0; i < 5; i++ {
+			for _, v := range helpers.ParseInts(halves[1]) {
+				damagedLengths = append(damagedLengths, v)
+			}
+		}
+		start := time.Now()
 		matches := findMatches(springMap, damagedLengths, "", len(springMap))
+		fmt.Println("Line", lineNumber, "done in:", time.Now().Sub(start))
+		fmt.Println("Line", lineNumber, "matches:", matches)
 
 		lineNumber++
 		totalArrangements += matches
@@ -36,6 +45,19 @@ func RunDay12() {
 
 func findMatches(springMap string, damagedLengths []int, mapInProgress string, mapLen int) int {
 	matches := 0
+
+	mandatoryChars := 0
+	for _, v := range damagedLengths {
+		mandatoryChars += v
+	}
+
+	availableSpots := strings.Count(springMap, "?")
+	availableSpots += strings.Count(springMap, "#")
+
+	if mandatoryChars > availableSpots {
+		return 0
+	}
+
 	for i := 0; i < len(springMap); i++ {
 		if springMap[i] == '.' {
 			mapInProgress += "."
