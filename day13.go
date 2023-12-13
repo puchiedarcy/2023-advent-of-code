@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strings"
 )
@@ -38,7 +39,8 @@ func RunDay13Part2() {
 			rowMap[row] = inBits
 			row++
 			for k, v := range lineText {
-				colMap[k] += string(v)
+				s := strings.Replace(string(v), "#", "1", -1)
+				colMap[k] += strings.Replace(s, ".", "0", -1)
 			}
 		}
 	}
@@ -51,13 +53,106 @@ func RunDay13Part2() {
 }
 
 func doThePuzzle(rowMap map[int]string, colMap map[int]string) (int, int) {
-	mirror, found := findExistingSymmetry(rowMap)
-	if found {
-		return mirror, 0
+	oldRowMirror, _ := findExistingSymmetry(rowMap)
+	fmt.Println("Check Rows, but skip", oldRowMirror)
+	newMirror, newFound := findNewSymmetry(rowMap, oldRowMirror)
+
+	if newFound {
+		return newMirror, 0
 	}
 
-	mirror, found = findExistingSymmetry(colMap)
-	return 0, mirror
+	oldColMirror, _ := findExistingSymmetry(colMap)
+	fmt.Println("Check Cols, but skip", oldColMirror)
+	newColMirror, newColFound := findNewSymmetry(colMap, oldColMirror)
+	if !newColFound {
+		log.Fatalln(rowMap)
+	}
+	return 0, newColMirror
+}
+
+func findNewSymmetry(bitMap map[int]string, skip int) (int, bool) {
+	hammings := make(map[int]int)
+	zeroHams := []int{}
+	oneHams := []int{}
+	for i := 0; i < len(bitMap)-1; i++ {
+		h := hamming([]byte(bitMap[i]), []byte(bitMap[i+1]))
+		hammings[i+1] = h
+		if h == 0 {
+			zeroHams = append(zeroHams, i+1)
+		} else if h == 1 {
+			oneHams = append(oneHams, i+1)
+		}
+	}
+
+	fmt.Println(hammings)
+	fmt.Println(zeroHams)
+
+	newMirror, found := checkHams(zeroHams, hammings, bitMap, skip, false)
+	if found {
+		return newMirror, found
+	}
+
+	fmt.Println(oneHams)
+	newMirror, found = checkHams(oneHams, hammings, bitMap, skip, true)
+	return newMirror, found
+}
+
+func checkHams(mirrorList []int, hammings map[int]int, bitMap map[int]string, skip int, usedSmudge bool) (int, bool) {
+	for i := 0; i < len(mirrorList); i++ {
+		if mirrorList[i] == skip {
+			continue
+		}
+		usedSmudge := usedSmudge
+		left := mirrorList[i] - 1
+		right := mirrorList[i] + 1
+
+		isMirror := true
+		for left > 0 || right <= len(bitMap) {
+
+			fmt.Println(left, mirrorList[i], right)
+			leftEdge := false
+			if left <= 0 {
+				leftEdge = true
+			}
+
+			rightEdge := false
+			if right > len(bitMap) {
+				rightEdge = true
+			}
+
+			hD := 0
+			if !leftEdge && !rightEdge {
+				hD = int(math.Abs(float64(hammings[left] - hammings[right])))
+			} else if leftEdge {
+				hD = hammings[right]
+			} else if rightEdge {
+				hD = hammings[left]
+			} else {
+				isMirror = false
+				break
+			}
+
+			if hD == 0 {
+				left--
+				right++
+				continue
+			} else if hD == 1 && !usedSmudge {
+				usedSmudge = true
+				left--
+				right++
+				continue
+			} else {
+				isMirror = false
+				break
+			}
+		}
+
+		if isMirror {
+			fmt.Println("FOUND", mirrorList[i])
+			return mirrorList[i], true
+		}
+	}
+	return 0, false
 }
 
 func findExistingSymmetry(bitMap map[int]string) (int, bool) {
