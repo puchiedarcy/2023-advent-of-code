@@ -24,20 +24,53 @@ func RunDay16() {
 		lineNumber++
 	}
 
-	energizedMap := make(map[int]string)
+	maxEnergy := 0
 	for i := 0; i < len(theMap); i++ {
-		energizedMap[i] = strings.Repeat(".", len(theMap[i]))
+		energizedMap := makeEmptyEnergyMap(len(theMap))
+		alreadyBeamed := make(map[int]bool)
+		FollowBeam(i, 0, LEFT, &theMap, &energizedMap, &alreadyBeamed)
+		energyLevel := 0
+		for i := 0; i < len(energizedMap); i++ {
+			energyLevel += strings.Count(energizedMap[i], "#")
+		}
+		maxEnergy = max(maxEnergy, energyLevel)
+
+		energizedMap = makeEmptyEnergyMap(len(theMap))
+		alreadyBeamed = make(map[int]bool)
+		FollowBeam(0, i, UP, &theMap, &energizedMap, &alreadyBeamed)
+		energyLevel = 0
+		for i := 0; i < len(energizedMap); i++ {
+			energyLevel += strings.Count(energizedMap[i], "#")
+		}
+		maxEnergy = max(maxEnergy, energyLevel)
+
+		energizedMap = makeEmptyEnergyMap(len(theMap))
+		alreadyBeamed = make(map[int]bool)
+		FollowBeam(i, len(theMap)-1, RIGHT, &theMap, &energizedMap, &alreadyBeamed)
+		energyLevel = 0
+		for i := 0; i < len(energizedMap); i++ {
+			energyLevel += strings.Count(energizedMap[i], "#")
+		}
+		maxEnergy = max(maxEnergy, energyLevel)
+
+		energizedMap = makeEmptyEnergyMap(len(theMap))
+		alreadyBeamed = make(map[int]bool)
+		FollowBeam(len(theMap)-1, i, DOWN, &theMap, &energizedMap, &alreadyBeamed)
+		energyLevel = 0
+		for i := 0; i < len(energizedMap); i++ {
+			energyLevel += strings.Count(energizedMap[i], "#")
+		}
+		maxEnergy = max(maxEnergy, energyLevel)
 	}
+	fmt.Println(maxEnergy)
+}
 
-	alreadyBeamed := make(map[int]bool)
-
-	FollowBeam(0, 0, LEFT, &theMap, &energizedMap, &alreadyBeamed)
-
-	energyLevel := 0
-	for i := 0; i < len(energizedMap); i++ {
-		energyLevel += strings.Count(energizedMap[i], "#")
+func makeEmptyEnergyMap(sideLength int) map[int]string {
+	energizedMap := make(map[int]string)
+	for i := 0; i < sideLength; i++ {
+		energizedMap[i] = strings.Repeat(".", sideLength)
 	}
-	fmt.Println(energyLevel)
+	return energizedMap
 }
 
 func FollowBeam(row int, col int, enteringFrom int, theMap *map[int]string, energizedMap *map[int]string, alreadyBeamed *map[int]bool) {
