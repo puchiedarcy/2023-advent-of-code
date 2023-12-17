@@ -7,6 +7,6 @@ import (
 
 func main() {
 	start := time.Now()
-	RunDay15()
+	RunDay16()
 	fmt.Println("Done in:", time.Now().Sub(start))
 }
